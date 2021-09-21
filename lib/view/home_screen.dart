@@ -1,19 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:restaurant_hub/components/resto_info_card.dart';
-import 'package:restaurant_hub/data/request_data.dart';
-import 'package:restaurant_hub/data/response_restaurant.dart';
+import 'package:restaurant_hub/controller/detail_restaurant_controller.dart';
+import 'package:restaurant_hub/controller/home_screen_controller.dart';
+import 'package:restaurant_hub/data/response.dart';
 import 'package:restaurant_hub/view/detail_restaurant_screen.dart';
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
-
-  @override
-  _HomeScreenState createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
-  ResponseRestaurant? responseRestaurant;
+class HomeScreen extends StatelessWidget {
+  HomeScreenController _controller = Get.put(HomeScreenController());
+  DetailRestaurantController _detailController = Get.put(DetailRestaurantController());
   AppBar _buildAppBar() {
     return AppBar(
       flexibleSpace: Container(
@@ -33,10 +29,8 @@ class _HomeScreenState extends State<HomeScreen> {
               style: GoogleFonts.poppins(
                   fontWeight: FontWeight.w400, fontSize: 16.0),
               children: <TextSpan>[
-                new TextSpan(text: 'Restaurant'),
-                new TextSpan(
-                    text: 'Hub',
-                    style: new TextStyle(fontWeight: FontWeight.bold)),
+                TextSpan(text: 'Restaurant'),
+                TextSpan(text: 'Hub', style: TextStyle(fontWeight: FontWeight.bold)),
               ],
             ),
           ),
@@ -49,55 +43,56 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: _buildAppBar(),
-      body: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 8.0),
-            child: TextFormField(
-                decoration: InputDecoration(
-                    isDense: true,
-                    hintText: "Cari ...",
-                    contentPadding: EdgeInsets.fromLTRB(16, 8, 16, 8),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16.0),
-                      borderSide: BorderSide(color: Colors.blue),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16.0),
-                      borderSide: BorderSide(color: Colors.blue),
-                    ))),
-          ),
-          Expanded(
-            child: FutureBuilder(
-                future: RequestData.getData(),
-                builder: (context, snapshot) {
-                  if (snapshot.hasData) {
-                    responseRestaurant = snapshot.data as ResponseRestaurant?;
-                    return (responseRestaurant != null)
-                        ? ListView.builder(
-                            itemCount: responseRestaurant!.restaurants.length,
-                            itemBuilder: (context, index) {
-                              return InkWell(
-                                onTap: () {
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                              DetailRestaurantScreen(
-                                                  responseRestaurant!
-                                                      .restaurants[index])));
-                                },
-                                child: restoInfoCard(
-                                    responseRestaurant!.restaurants[index]),
-                              );
-                            })
-                        : Center(child: Text("Data kosong ..."));
-                  } else {
-                    return Center(child: CircularProgressIndicator());
-                  }
-                }),
-          ),
-        ],
+      body: RefreshIndicator(
+        onRefresh: () {
+          return _controller.getRestaurantList();
+        },
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 8.0),
+              child: TextFormField(
+                  decoration: InputDecoration(
+                      isDense: true,
+                      hintText: "Cari ...",
+                      contentPadding: EdgeInsets.fromLTRB(16, 8, 16, 8),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16.0),
+                        borderSide: BorderSide(color: Colors.blue),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16.0),
+                        borderSide: BorderSide(color: Colors.blue),
+                      ))),
+            ),
+            Expanded(
+              child: Obx(() {
+                if (_controller.response.value.status == Status.COMPLETED) {
+                  return ListView.builder(
+                      itemCount: _controller.dataList.length,
+                      itemBuilder: (context, index) {
+                        return InkWell(
+                          onTap: () {
+                            _detailController.getRestaurantList(_controller.dataList[index].id!);
+                            Get.to(DetailRestaurantScreen());
+                          },
+                          child: restoInfoCard(_controller.dataList[index]),
+                        );
+                      });
+                } else if (_controller.response.value.status == Status.ERROR) {
+                  return ListView(
+                    children: [
+                      SizedBox(height: MediaQuery.of(context).size.height / 3),
+                      Center(child: Text(_controller.response.value.message)),
+                    ],
+                  );
+                } else {
+                  return Center(child: CircularProgressIndicator());
+                }
+              }),
+            ),
+          ],
+        ),
       ),
     );
   }

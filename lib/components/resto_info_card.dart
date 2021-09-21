@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:restaurant_hub/data/response_restaurant.dart';
+import 'package:restaurant_hub/data/response_restaurant_list.dart';
 
-Widget restoInfoCard(Restaurants restaurants){
+Widget restoInfoCard(Restaurant restaurants){
   return Padding(
     padding: const EdgeInsets.symmetric(horizontal: 16.0),
     child: Container(
@@ -18,7 +18,7 @@ Widget restoInfoCard(Restaurants restaurants){
               borderRadius:
               BorderRadius.all(Radius.circular(16.0)),
               child: Image.network(
-                  restaurants.pictureId,
+                  'https://restaurant-api.dicoding.dev/images/medium/' + restaurants.pictureId!,
                   height: 100,
                   width: 100,
                   fit: BoxFit.cover),
@@ -35,7 +35,7 @@ Widget restoInfoCard(Restaurants restaurants){
                   children: [
                     Expanded(
                       child: Text(
-                          restaurants.name,
+                          restaurants.name!,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: GoogleFonts.poppins(
@@ -55,13 +55,13 @@ Widget restoInfoCard(Restaurants restaurants){
                   ],
                 ),
                 Text(
-                    restaurants.city,
+                    restaurants.city!,
                     style: GoogleFonts.poppins(
                         color: Colors.black54,
                         fontSize: 14.0,
                         fontWeight: FontWeight.w500)),
                 Text(
-                    restaurants.description,
+                    restaurants.description!,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.poppins(
