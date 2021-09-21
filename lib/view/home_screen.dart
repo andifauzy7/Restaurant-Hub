@@ -52,6 +52,10 @@ class HomeScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 8.0),
               child: TextFormField(
+                  controller: _controller.searchController,
+                  onChanged: (String value){
+                    _controller.searchRestaurantList();
+                  },
                   decoration: InputDecoration(
                       isDense: true,
                       hintText: "Cari ...",

@@ -27,9 +27,10 @@ class RequestData {
     }
   }
 
-  static Future<dynamic> get(String url) async {
+  static Future<dynamic> get(String url, Map<String, dynamic> queryParameter) async {
     var responseJson;
-    var uri = Uri.https(pathURL, url);
+    var uri = Uri.https(pathURL, url, queryParameter);
+    print(uri.toString());
 
     try {
       final response = await http.get(uri);

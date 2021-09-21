@@ -10,7 +10,7 @@ class DetailRestaurantController extends GetxController {
   Future<void> getRestaurantList(String id) async {
     response(ResponseCall.loading('Getting detail restaurant ...'));
     try {
-      var result = await RequestData.get('detail/$id');
+      var result = await RequestData.get('detail/$id', Map());
       response(ResponseCall.completed(ResponseDetailRestaurant.fromJson(result).restaurant));
       restaurant = response.value.data;
     } catch (e) {
